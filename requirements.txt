@@ -1,0 +1,2 @@
+# stdlib only for this demo (urllib, json, time) — add real deps here
+# e.g. requests, sqlalchemy, etc. as your job grows

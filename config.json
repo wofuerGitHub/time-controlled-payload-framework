@@ -1,0 +1,8 @@
+{
+  "speed": 60,
+  "control_file": "state/speed.ctl",
+  "delay_seconds": 3600,
+  "urls": [
+    "https://api.github.com"
+  ]
+}
