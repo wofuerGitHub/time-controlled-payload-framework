@@ -1,7 +1,7 @@
 {
-  "requests": {
-    "requests_per_minute": 10,
-    "timeout_seconds": 30
+  "speed_control": {
+    "throttle_file": "runtime/throttle.json",
+    "requests_per_minute": 10
   },
   "jobs": [
     {
@@ -12,8 +12,5 @@
       "delay_seconds": 30,
       "enabled": true
     }
-  ],
-  "runtime": {
-    "throttle_file": "runtime/throttle.json"
-  }
+  ]
 }
