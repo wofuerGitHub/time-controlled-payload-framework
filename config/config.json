@@ -1,39 +1,5 @@
-
-fda99809-b299-4db3-9984-ae6cfdcdd8ab.png
-VS folder structure, where to put:
-requirements.txt
-config.json
-
-In the VS Code terminal, from your project root:
-source .venv/bin/activate
-On macOS/Linux, your prompt should then change to something like:
-(.venv) time-controlled-queries-demo %
-Verify it with:
-which python
-It should point to:
-.../time-controlled-queries-demo/.venv/bin/python
-If .venv does not exist yet, create it first:
-python3 -m venv .venv
-source .venv/bin/activate
-
-update requirements.txt
-
-For the code we’ve written so far, requirements.txt can stay empty because we’re using only the Python standard library.
-I’d make it:
-
-# No external Python dependencies required.
-If you want to switch the API calls from urllib to the more convenient requests library, then use:
-requests==2.32.3
-and install it with:
-pip install -r requirements.txt
-For this demo, I’d keep it dependency-free for now.
-
-for the demo, job 1 should call https://invest.wofuer.com/myapi/health
-
-For the demo, let's make Job 1 call your health endpoint. I’d also start evolving config.json toward supporting multiple jobs.
-config/config.json
 {
-  "api": {
+  "requests": {
     "requests_per_minute": 10,
     "timeout_seconds": 30
   },
