@@ -1,63 +1,23 @@
 # time-controlled-queries-demo
 
-Minimal starting point for two patterns commonly needed when polling a
-rate-limited API on a recurring schedule, without any external scheduler
-library or MySQL event scheduler:
+Minimal Python demo for two common patterns when polling a rate-limited API on a recurring schedule, without using an external scheduler library or a MySQL event scheduler.
 
-1. **Query throttling** (`src/rate_limiter.py`) — cap outbound calls to
-   N per minute using a small control file that persists the
-   next-allowed timestamp, so the limit holds even across restarts.
-2. **Job cadence** (`src/job.py`) — a job does its work once, sleeps for
-   a configured delay, then exits. Paired with a process manager that
-   restarts the process on exit (Docker's `restart: always` here), this
-   is a full "run every N seconds" schedule with zero scheduler code.
+1. **Query throttling**  
+   Limit outbound API calls to `N` requests per minute using a small persisted control file that stores the next allowed request timestamp. Because the state is stored on disk, the throttle survives process restarts.
 
-## Layout
+2. **Job cadence**  
+   A job runs once, waits for a configured delay, then exits. A process manager restarts it after exit. In this demo, Docker uses `restart: always`, giving a simple "run every N seconds" execution model without scheduler-specific application code.
 
-```
-config.json              # speed (queries/min), delay_seconds, urls to poll
-src/rate_limiter.py       # pattern 1: configure() + wait_for_slot()
-src/job.py                # pattern 2: do_work() then sleep(delay) then exit
-src/config_loader.py      # tiny JSON config loader
-src/demo_rate_limiter.py  # standalone demo, no network/config needed
-Dockerfile, docker-compose.yml
-```
+## Application Lifecycle
 
-## Try the rate limiter alone
-
-```bash
-cd src
-python demo_rate_limiter.py   # 5 calls, spaced ~5s apart (speed=12/min)
-python demo_rate_limiter.py   # run again immediately: it still waits,
-                               # because demo_speed.ctl persisted the state
-```
-
-## Run the job locally
-
-```bash
-pip install -r requirements.txt
-mkdir -p state
-cd src && python job.py       # fetches config.json's urls, then sleeps
-```
-
-## Run it as a self-scheduling service
-
-```bash
-docker compose up --build
-```
-
-The container runs `job.py` once, sleeps `delay_seconds`, and exits;
-`restart: always` makes Docker relaunch it, so the job re-runs on that
-interval indefinitely. The `job_state` volume keeps `state/speed.ctl`
-around across restarts so the rate limit stays consistent.
-
-## Adapting this for a real project
-
-- Replace `do_work()` in `src/job.py` with your actual fetch/parse/store
-  logic; call `wait_for_slot()` right before every outbound request.
-- Give each distinct job its own `delay_seconds` in `config.json` (or its
-  own config file) and its own Dockerfile/service in
-  `docker-compose.yml` if you have several independent jobs.
-- If several jobs share one upstream API's rate limit, point them at the
-  same `control_file` (and mount it from the same volume) so they
-  throttle against each other, not just themselves.
+1. Container starts
+2. `main.py` runs
+3. `main.py` reads `config/config.json`
+4. Configuration is validated
+5. The job runs
+6. API requests are throttled as needed
+7. The job completes
+8. The process sleeps for the configured delay
+9. The process exits
+10. Docker restarts the container
+11. The cycle repeats

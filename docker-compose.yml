@@ -1,9 +1,0 @@
-services:
-  job:
-    build: .
-    restart: always          # <- this is what turns "sleep then exit" into a schedule
-    volumes:
-      - job_state:/app/state # persist speed.ctl across restarts
-
-volumes:
-  job_state:
