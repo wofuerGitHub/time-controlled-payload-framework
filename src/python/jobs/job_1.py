@@ -1,8 +1,10 @@
+# This is a sample job that performs an HTTP GET request to a specified URL and prints the response. 
+# It uses the `urllib` library to make the request and handles SSL verification using the `certifi` package.
+
 import ssl
 import certifi
 
 from urllib.request import Request, urlopen
-
 
 def run_job(job_config: dict, request_config: dict) -> None:
     job_id = job_config["id"]
