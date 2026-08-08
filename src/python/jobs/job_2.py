@@ -1,8 +1,10 @@
+# This is a sample job that performs an HTTP GET request to a specified URL and prints the response. 
+# It uses the `urllib` library to make the request and handles SSL verification using the `certifi` package.
+
 import ssl
 import certifi
 
 from urllib.request import Request, urlopen
-
 
 def run_job(job_config: dict, request_config: dict) -> None:
     job_id = job_config["id"]
@@ -38,13 +40,14 @@ def run_job(job_config: dict, request_config: dict) -> None:
 
     print(f"[{job_id}] Completed", flush=True)
 
+# --- 
 
 if __name__ == "__main__":
     job_config = {
-        "id": "job1",
-        "name": "API Health Check",
-        "url": "https://invest.wofuer.com/myapi/health",
-        "method": "GET",
+        "id": "job2",
+        "name": "Yahoo Finance AAPL",
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1d&interval=1d",
+        "method": "GET"
     }
 
     request_config = {
