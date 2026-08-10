@@ -1,9 +1,27 @@
-### Throttle Function
-# read timing parameters from a configuration file or environment variables
-# calculate waiting time for the next execution
-# write the next allowed execution time to a configuration file or environment variable
-# return the waiting time for the next execution
+"""
+Provide file-based request throttling for recurring or rate-limited jobs.
 
+This module maintains a persistent throttle state containing the Unix timestamp
+at which the next request is allowed. It calculates the required waiting time
+based on a configured requests-per-minute limit and updates the throttle state
+after each execution.
+
+If the throttle state file is missing or invalid, it is recreated using the
+current timestamp.
+
+Main functions:
+    throttle_file_rw():
+        Read or write the persistent throttle state.
+
+    timing_logic():
+        Calculate the next allowed execution time and required waiting time.
+
+    throttle():
+        Apply the complete throttling workflow and return the required delay.
+
+The module can also be executed directly to test the throttling behavior using
+the application's configuration file.
+"""
 
 import json
 from pathlib import Path
@@ -11,7 +29,8 @@ import time
 from typing import Optional
 import warnings
 
-def throttle_file_rw(throttle_path: Path, mode: str = "r", next_allowed_at: Optional[float] = None) -> float:
+def throttle_file_rw(throttle_path: Path, mode: str = "r", \
+                     next_allowed_at: Optional[float] = None) -> float:
     """
     Read or write the throttle state file.
 
@@ -125,11 +144,11 @@ def throttle_file_rw(throttle_path: Path, mode: str = "r", next_allowed_at: Opti
         )
 
         return throttle_file_rw(
-            throttle_path, 
-            "w", 
+            throttle_path,
+            "w",
             next_allowed_at=time.time()
         )
-        
+
 def timing_logic(next_allowed_at: float, requests_per_minute: float,) -> tuple[float, float]:
     """
     Calculate the next allowed execution time based on the request rate.
@@ -185,8 +204,8 @@ def throttle(throttle_path: Path, requests_per_minute: float) -> float:
 
 def main() -> None:
     """
-    for testing purposes only, run the throttle logic in a loop, printing the current timing parameters,
-    the next allowed execution time, and the waiting time before the next execution.
+    For testing purposes only, run the throttle logic in a loop, printing the current timing 
+    parameters, the next allowed execution time, and the waiting time before the next execution.
 
     Logic:
         1. Read next_allowed_at from throttle file and use requests_per_minute.
@@ -196,7 +215,7 @@ def main() -> None:
     """
 
     config_file = "config/config.json"
-    config_path = Path(config_file)    
+    config_path = Path(config_file)
     project_root = config_path.parent.parent
     with config_path.open("r", encoding="utf-8") as file:
         config = json.load(file)
@@ -214,7 +233,11 @@ def main() -> None:
 
         # Wait for the next allowed execution time based on the throttle logic
         time.sleep(throttle(throttle_path, requests_per_minute))
-        print(f"Payload executed at {time.time()}. Time since last execution: {time.time() - last_execution_time:.6f} seconds.")
+        print(
+            f"Payload executed at {time.time()}. "
+            f"Time since last execution: "
+            f"{time.time() - last_execution_time:.6f} seconds."
+        )
         last_execution_time = time.time()
 
 if __name__ == "__main__":

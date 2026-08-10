@@ -4,9 +4,9 @@
     "requests_per_minute": 30
   },
   "logging": {
+    "file": "runtime/app.log",
     "level": "INFO",
-    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    "file": "runtime/app.log"
+    "format": "%(asctime)s - %(job_id)s - %(name)s - %(levelname)s - %(message)s"
   },
   "jobs": [
     {
@@ -14,7 +14,10 @@
       "name": "Job Type 1 - Instance 1",
       "type": "job_type_1",
       "delay_seconds": 11,
-      "enabled": true
+      "enabled": true,
+      "logging": {
+        "level": "DEBUG"
+      }
     },
     {
       "id": "id2",

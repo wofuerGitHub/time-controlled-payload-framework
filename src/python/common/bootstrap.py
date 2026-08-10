@@ -1,5 +1,13 @@
+"""
+Common application bootstrap utilities.
+
+Provides configuration loading, job selection, and logging initialization
+for the application's job processes.
+"""
+
 import argparse
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -69,26 +77,72 @@ def load_config(config_path: Path) -> dict[str, Any]:
     return config
 
 # Function to setup logging configuration based on the loaded configuration
-def setup_logging(config: dict[str, Any]) -> None:
+def setup_logging(config: dict[str, Any], job_config: dict[str, Any]) -> None:
     """
-    Setup logging configuration based on the loaded configuration.
+    Setup logging using global settings and optional job-specific overrides.
 
-    Parameters:
-        config:
-            Loaded configuration dictionary.
+    Job-specific logging settings override global logging settings.
     """
 
-    import logging.config
+    # Global logging configuration
+    global_logging = config.get("logging", {})
 
-    logging_config = config.get("logging", {})
-    if logging_config:
-        logging.config.dictConfig(logging_config)
+    # Job-specific logging configuration
+    job_logging = job_config.get("logging", {})
+
+    # Merge configuration: job settings override global settings
+    logging_config = {
+        **global_logging,
+        **job_logging,
+    }
+
+    # Read settings
+    log_file = logging_config.get("file")
+    log_level = logging_config.get("level", "INFO")
+    log_format = logging_config.get(
+        "format",
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    # Convert logging level string to logging constant
+    level = getattr(logging, str(log_level).upper(), None)
+
+    if not isinstance(level, int):
+        raise ValueError(
+            f"Invalid logging level: {log_level}"
+        )
+
+    # Create log directory if necessary
+    if log_file:
+        log_path = PROJECT_ROOT / log_file
+        log_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
     else:
-        # Default logging configuration if not specified in the config
-        logging.basicConfig(level=logging.INFO)
+        log_path = None
 
-# Function to initialize the application by parsing command-line arguments and loading the configuration
-def initialize():
+    # Configure logging
+    logging.basicConfig(
+        filename=log_path,
+        level=level,
+        format=log_format,
+    )
+
+# Function initializing application by parsing command-line arguments and configuration loading
+def initialize() -> tuple[dict[str, Any], dict[str, Any]]:
+    """
+    Initialize the application.
+
+    Parses the job ID from the command line, loads the configuration,
+    selects the matching job configuration, and initializes logging.
+
+    Returns:
+        dict[str, Any]:
+            Configuration of the selected job.
+            Returns an empty dictionary if the job ID does not exist.
+    """
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -98,13 +152,45 @@ def initialize():
 
     args = parser.parse_args()
 
+    # Load complete application configuration
     config = load_config(CONFIG_PATH)
-    return config
+
+    # Find requested job configuration
+    job_config = next(
+        (
+            job
+            for job in config.get("jobs", [])
+            if isinstance(job, dict)
+            and job.get("id") == args.id
+        ),
+        {},
+    )
+
+    setup_logging(
+        config=config,
+        job_config=job_config,
+    )
+
+    return config, job_config
 
 # ---
 
 def main() -> None:
-    print(json.dumps(initialize(), indent=4))
-    
+    """
+    For testing purposes only, get the job configuration and print it to the console.
+    """
+    config, job_config = initialize()
+
+    logger = logging.LoggerAdapter(
+        logging.getLogger(__name__),
+        {"job_id": job_config["id"]},
+    )
+
+    logger.info("Application started")
+    logger.debug("Job configuration: %s", job_config)
+
+    print(json.dumps(config["speed_control"], indent=4))
+    print(json.dumps(job_config, indent=4))
+
 if __name__ == "__main__":
     main()
