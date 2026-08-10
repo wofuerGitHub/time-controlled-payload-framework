@@ -6,17 +6,11 @@ import time
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-CONFIG_PATH = Path(
-    os.getenv(
-        "APP_CONFIG",
-        PROJECT_ROOT / "config" / "config.json",
-    )
-)
+CONFIG_PATH = Path(os.getenv("APP_CONFIG", PROJECT_ROOT / "config" / "config.json"))
 
 def load_config() -> dict:
     with CONFIG_PATH.open("r", encoding="utf-8") as file:
         return json.load(file)
-
 
 def main() -> None:
     """
@@ -30,21 +24,16 @@ def main() -> None:
         4. Sleep for waiting_time seconds before the next iteration.
     """
 
-    config_file = "config/config.json"
-    config_path = Path(config_file)    
-    project_root = config_path.parent.parent
-    with config_path.open("r", encoding="utf-8") as file:
-        config = json.load(file)
+    config = load_config()
     requests_per_minute = float(config["speed_control"]["requests_per_minute"])
     throttle_file = config["speed_control"]["throttle_file"]
-    throttle_path = project_root / throttle_file
+    throttle_path = PROJECT_ROOT / throttle_file
 
     print(f"Using throttle file: {throttle_path.resolve()}")
     print(f"Using requests_per_minute: {requests_per_minute}")
     print("Starting throttle loop. Press Ctrl+C to exit.")
 
     last_execution_time = time.time()
-
     while True:
 
         # Wait for the next allowed execution time based on the throttle logic
