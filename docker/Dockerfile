@@ -1,7 +1,11 @@
 FROM python:3.12-slim
 
 WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY config ./config
 COPY src ./src
 
-CMD ["python", "src/python/main.py"]
+CMD ["python", "src/python/job1.py"]
