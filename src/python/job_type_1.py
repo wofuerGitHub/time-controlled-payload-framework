@@ -1,27 +1,36 @@
 import json
 import os
 from pathlib import Path
-from throttle import throttle
+from common.throttle import throttle
+import sys
 import time
 
+# Check for the required command-line argument
+if len(sys.argv) < 2:
+    raise ValueError(
+        "Missing required argument: id. "
+        "Usage: python job_type_1.py <id>"
+    )
+
+id = sys.argv[1]
+
+# Determine the project root directory and configuration file path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
+# Load the configuration file path from the environment variable or use the default path
 CONFIG_PATH = Path(os.getenv("APP_CONFIG", PROJECT_ROOT / "config" / "config.json"))
 
+# Function to load the configuration from the JSON file
 def load_config() -> dict:
     with CONFIG_PATH.open("r", encoding="utf-8") as file:
         return json.load(file)
 
+# Main function to execute the job type 1 logic
 def main() -> None:
     """
-    for testing purposes only, run the throttle logic in a loop, printing the current timing parameters,
-    the next allowed execution time, and the waiting time before the next execution.
-
-    Logic:
-        1. Read next_allowed_at from throttle file and use requests_per_minute.
-        2. Calculate waiting time and next_allowed_at.
-        3. Write next_allowed_at back to throttle file.
-        4. Sleep for waiting_time seconds before the next iteration.
+    Job Type 1: This job type executes a payload at a controlled rate defined by the configuration file. 
+    It reads the throttle settings from the configuration and uses a throttle file to determine when to 
+    execute the payload. The job runs indefinitely until interrupted by the user.
     """
 
     config = load_config()

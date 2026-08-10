@@ -10,7 +10,7 @@ from unittest.mock import call, patch
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / "src" / "python"))
 
-import throttle as throttle_module
+import common.throttle as throttle_module
 
 
 class ThrottleFileReadWriteTests(unittest.TestCase):
