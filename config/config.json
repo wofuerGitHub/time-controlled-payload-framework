@@ -1,7 +1,7 @@
 {
   "speed_control": {
     "throttle_file": "runtime/throttle.json",
-    "requests_per_minute": 10
+    "requests_per_minute": 30
   },
   "jobs": [
     {
