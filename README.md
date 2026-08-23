@@ -1,4 +1,4 @@
-# time-controlled-queries-demo
+# time-controlled-payload-framework
 
 Minimal Python demo for two common patterns when polling a rate-limited REQUESTS on a recurring schedule, without using an external scheduler library or a MySQL event scheduler.
 
