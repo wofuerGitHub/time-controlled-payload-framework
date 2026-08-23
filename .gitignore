@@ -38,3 +38,6 @@ config/config.secret.json
 # Docker / local temporary files
 *.pid
 *.tmp
+
+# Runtime generated files
+runtime/*
