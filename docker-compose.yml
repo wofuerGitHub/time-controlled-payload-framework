@@ -1,0 +1,17 @@
+services:
+  job1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["python", "src/python/job_type_1.py", "id1"]
+    restart: always
+    volumes:
+      - ./runtime:/app/runtime
+  job2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["python", "src/python/job_type_1.py", "id2"]
+    restart: always
+    volumes:
+      - ./runtime:/app/runtime

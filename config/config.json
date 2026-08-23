@@ -13,6 +13,7 @@
       "id": "id1",
       "name": "Job Type 1 - Instance 1",
       "type": "job_type_1",
+      "executions": 10,
       "delay_seconds": 11,
       "enabled": true,
       "logging": {
@@ -23,21 +24,8 @@
       "id": "id2",
       "name": "Job Type 1 - Instance 2",
       "type": "job_type_1",
+      "executions": 10,
       "delay_seconds": 12,
-      "enabled": true
-    },
-    {
-      "id": "id3",
-      "name": "Job Type 2 - Instance 1",
-      "type": "job_type_2",
-      "delay_seconds": 13,
-      "enabled": true
-    },
-    {
-      "id": "id4",
-      "name": "Job Type 3 - Instance 1",
-      "type": "job_type_3",
-      "delay_seconds": 14,
       "enabled": true
     }
   ]

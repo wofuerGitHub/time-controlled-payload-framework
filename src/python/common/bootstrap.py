@@ -140,7 +140,10 @@ def initialize() -> tuple[dict[str, Any], dict[str, Any]]:
     Returns:
         dict[str, Any]:
             Configuration of the selected job.
-            Returns an empty dictionary if the job ID does not exist.
+
+        Raises:
+            ValueError:
+                If the job ID does not exist or the job is disabled.
     """
 
     parser = argparse.ArgumentParser()
@@ -165,6 +168,12 @@ def initialize() -> tuple[dict[str, Any], dict[str, Any]]:
         ),
         {},
     )
+
+    if not job_config:
+        raise ValueError(f"Unknown job id: {args.id}")
+
+    if not job_config.get("enabled", True):
+        raise ValueError(f"Job is disabled: {args.id}")
 
     setup_logging(
         config=config,
