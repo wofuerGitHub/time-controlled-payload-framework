@@ -17,7 +17,7 @@
       "delay_seconds": 4.3,
       "enabled": true,
       "logging": {
-        "level": "INFO"
+        "level": "DEBUG"
       }
     },
     {
