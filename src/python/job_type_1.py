@@ -18,7 +18,7 @@ def main() -> None:
         logging.getLogger(__name__),
         {"job_id": job_config["id"]},
     )
-    logger.info("Application started")
+    logger.info("Starting %s.", job_config["id"])
     logger.debug("Job configuration: %s", job_config)
 
     requests_per_minute = float(config["speed_control"]["requests_per_minute"])
@@ -60,7 +60,7 @@ def main() -> None:
         delay_seconds,
     )
     time.sleep(delay_seconds)
-    logger.info("Application ended")
+    logger.info("Ending %s.", job_config["id"])
 
 if __name__ == "__main__":
     main()
