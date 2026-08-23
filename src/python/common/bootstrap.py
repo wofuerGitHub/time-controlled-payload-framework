@@ -172,9 +172,6 @@ def initialize() -> tuple[dict[str, Any], dict[str, Any]]:
     if not job_config:
         raise ValueError(f"Unknown job id: {args.id}")
 
-    if not job_config.get("enabled", True):
-        raise ValueError(f"Job is disabled: {args.id}")
-
     setup_logging(
         config=config,
         job_config=job_config,
