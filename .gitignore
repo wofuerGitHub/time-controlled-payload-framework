@@ -42,3 +42,4 @@ config/config.secret.json
 # Runtime generated files
 runtime/*
 runtime/throttle.json
+runtime/throttle.json

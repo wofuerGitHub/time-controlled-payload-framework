@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY config ./config
 COPY src ./src
 
-CMD ["python", "src/python/job_type1.py"]
+CMD ["python", "src/python/job_type_1.py", "id1"]
