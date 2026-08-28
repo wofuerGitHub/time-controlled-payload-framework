@@ -81,11 +81,11 @@ The default configuration is in [config/config.json](config/config.json).
 
 | Key | Description | Current value |
 | --- | --- | --- |
-| `speed_control.throttle_file` | JSON file containing the next allowed Unix timestamp | `runtime/throttle.json` |
-| `speed_control.requests_per_minute` | Rate used to space executions; must be greater than zero | `100` |
-| `logging.file` | Log file path | `runtime/app.log` |
-| `logging.level` | Global Python logging level | `INFO` |
-| `logging.format` | Python logging format string | Includes timestamp, job ID, logger, level, and message |
+| `global.speed_control.throttle_file` | JSON file containing the next allowed Unix timestamp | `runtime/throttle.json` |
+| `global.speed_control.requests_per_minute` | Rate used to space executions; must be greater than zero | `100` |
+| `global.logging.file` | Log file path | `runtime/app.log` |
+| `global.logging.level` | Global Python logging level | `INFO` |
+| `global.logging.format` | Python logging format string | Includes timestamp, job ID, logger, level, and message |
 
 ### Job Settings
 

@@ -13,26 +13,27 @@ def main() -> None:
     Job Type 1 executes one throttled payload and then exits after its cadence
     delay. A process manager can restart the process for the next execution.
     """
-    config, job_config = initialize()
+    config = initialize()
     logger = logging.LoggerAdapter(
         logging.getLogger(__name__),
-        {"job_id": job_config["id"]},
+        {"job_id": config["id"]},
     )
-    logger.info("Starting %s.", job_config["id"])
-    logger.debug("Job configuration: %s", job_config)
+    logger.info("Starting %s.", config["id"])
+    logger.debug("Job configuration: %s", config)
 
-    requests_per_minute = float(config["speed_control"]["requests_per_minute"])
-    throttle_file = config["speed_control"]["throttle_file"]
+    speed_control = config["speed_control"]
+    requests_per_minute = float(speed_control["requests_per_minute"])
+    throttle_file = speed_control["throttle_file"]
     throttle_path = PROJECT_ROOT / throttle_file
-    delay_seconds = float(job_config.get("delay_seconds", 0))
-    count = int(job_config.get("executions", 1))
+    delay_seconds = float(config.get("delay_seconds", 0))
+    count = int(config.get("executions", 1))
 
     # print(f"Using throttle file: {throttle_path.resolve()}")
     # print(f"Using requests_per_minute: {requests_per_minute}")
     # print(f"Starting {job_config['id']}.")
     logger.debug("Using throttle file: %s", throttle_path.resolve())
     logger.debug("Using requests_per_minute: %s", requests_per_minute)
-    logger.debug("Starting %s.", job_config["id"])
+    logger.debug("Starting %s.", config["id"])
 
     last_execution_time = time.time()
     while count > 0:
@@ -56,11 +57,11 @@ def main() -> None:
     # print(f"Job {job_config['id']} completed. Exiting after {delay_seconds} seconds.")
     logger.debug(
         "Job %s completed. Exiting after %s seconds.",
-        job_config["id"],
+        config["id"],
         delay_seconds,
     )
     time.sleep(delay_seconds)
-    logger.info("Ending %s.", job_config["id"])
+    logger.info("Ending %s.", config["id"])
 
 if __name__ == "__main__":
     main()

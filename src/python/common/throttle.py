@@ -219,8 +219,9 @@ def main() -> None:
     project_root = config_path.parent.parent
     with config_path.open("r", encoding="utf-8") as file:
         config = json.load(file)
-    requests_per_minute = float(config["speed_control"]["requests_per_minute"])
-    throttle_file = config["speed_control"]["throttle_file"]
+    speed_control = config["global"]["speed_control"]
+    requests_per_minute = float(speed_control["requests_per_minute"])
+    throttle_file = speed_control["throttle_file"]
     throttle_path = project_root / throttle_file
 
     print(f"Using throttle file: {throttle_path.resolve()}")

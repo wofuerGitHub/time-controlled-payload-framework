@@ -18,6 +18,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 # Load the configuration file path from the environment variable or use the default path
 CONFIG_PATH = Path(os.getenv("APP_CONFIG", PROJECT_ROOT / "config" / "config.json"))
 
+# Function to merge job settings over global settings without dropping nested defaults
+def merge_config(global_config: dict[str, Any], job_config: dict[str, Any]) -> dict[str, Any]:
+    """Merge job settings over global settings without dropping nested defaults."""
+    merged_config = dict(global_config)
+
+    for key, value in job_config.items():
+        global_value = merged_config.get(key)
+        if isinstance(global_value, dict) and isinstance(value, dict):
+            merged_config[key] = merge_config(global_value, value)
+        else:
+            merged_config[key] = value
+
+    return merged_config
+
 # Function to load the configuration from the JSON file
 def load_config(config_path: Path) -> dict[str, Any]:
     """
@@ -76,25 +90,78 @@ def load_config(config_path: Path) -> dict[str, Any]:
 
     return config
 
+# Function initializing application by parsing command-line arguments and configuration loading
+def initialize() -> dict[str, Any]:
+    """
+    Initialize the application.
+
+    Parses the job ID from the command line, loads the configuration,
+    selects the matching job configuration, and initializes logging.
+
+    Returns:
+        dict[str, Any]:
+            Configuration of the selected job.
+
+        Raises:
+            ValueError:
+                If the job ID does not exist or the job is disabled.
+    """
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "id",
+        help="ID of the job instance",
+    )
+
+    args = parser.parse_args()
+
+    # Load complete application configuration
+    config = load_config(CONFIG_PATH)
+
+    # Find global configuration
+    global_config = config.get("global", {})
+
+    if not global_config:
+        raise ValueError(
+            f"Global configuration missing in {CONFIG_PATH.resolve()}"
+        )
+
+    # Find requested job configuration
+    job_config = next(
+        (
+            job
+            for job in config.get("jobs", [])
+            if isinstance(job, dict)
+            and job.get("id") == args.id
+        ),
+        {},
+    )
+
+    if not job_config:
+        raise ValueError(f"Unknown job id: {args.id}")
+
+    # job config overrides global config for all settings, including logging
+    if not job_config.get("enabled", True):
+        raise ValueError(f"Job {args.id} is disabled in configuration")
+
+    # Merge job configuration over global configuration
+    config = merge_config(global_config, job_config)
+
+    # Setup logging configuration
+    setup_logging(
+        config=config,
+    )
+
+    return config
+
 # Function to setup logging configuration based on the loaded configuration
-def setup_logging(config: dict[str, Any], job_config: dict[str, Any]) -> None:
+def setup_logging(config: dict[str, Any]) -> None:
     """
-    Setup logging using global settings and optional job-specific overrides.
-
-    Job-specific logging settings override global logging settings.
+    Setup logging using the initialized configuration.
     """
 
-    # Global logging configuration
-    global_logging = config.get("logging", {})
-
-    # Job-specific logging configuration
-    job_logging = job_config.get("logging", {})
-
-    # Merge configuration: job settings override global settings
-    logging_config = {
-        **global_logging,
-        **job_logging,
-    }
+    logging_config = config.get("logging", {})
 
     # Read settings
     log_file = logging_config.get("file")
@@ -129,74 +196,23 @@ def setup_logging(config: dict[str, Any], job_config: dict[str, Any]) -> None:
         format=log_format,
     )
 
-# Function initializing application by parsing command-line arguments and configuration loading
-def initialize() -> tuple[dict[str, Any], dict[str, Any]]:
-    """
-    Initialize the application.
-
-    Parses the job ID from the command line, loads the configuration,
-    selects the matching job configuration, and initializes logging.
-
-    Returns:
-        dict[str, Any]:
-            Configuration of the selected job.
-
-        Raises:
-            ValueError:
-                If the job ID does not exist or the job is disabled.
-    """
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "id",
-        help="ID of the job instance",
-    )
-
-    args = parser.parse_args()
-
-    # Load complete application configuration
-    config = load_config(CONFIG_PATH)
-
-    # Find requested job configuration
-    job_config = next(
-        (
-            job
-            for job in config.get("jobs", [])
-            if isinstance(job, dict)
-            and job.get("id") == args.id
-        ),
-        {},
-    )
-
-    if not job_config:
-        raise ValueError(f"Unknown job id: {args.id}")
-
-    setup_logging(
-        config=config,
-        job_config=job_config,
-    )
-
-    return config, job_config
-
 # ---
 
 def main() -> None:
     """
     For testing purposes only, get the job configuration and print it to the console.
     """
-    config, job_config = initialize()
+    config = initialize()
 
     logger = logging.LoggerAdapter(
         logging.getLogger(__name__),
-        {"job_id": job_config["id"]},
+        {"job_id": config["id"]},
     )
 
     logger.info("Application started")
-    logger.debug("Job configuration: %s", job_config)
+    logger.debug("Job configuration: %s", config)
 
-    print(json.dumps(config["speed_control"], indent=4))
-    print(json.dumps(job_config, indent=4))
+    print(json.dumps(config, indent=4))
 
 if __name__ == "__main__":
     main()
